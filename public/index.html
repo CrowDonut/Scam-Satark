@@ -1,0 +1,1544 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>ScamSatark – National Investor Resilience & Fraud Detection</title>
+    <meta name="description"
+        content="SANGYAN Hackathon initiative by SEBI & NSDL: Instant regional AI & Rule-based scam verifier, tip-group profiler, and investor protection tool.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Mukta:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="/i18n.js"></script>
+    <style>
+        :root {
+            --bg: #0b111e;
+            --card: #131c2e;
+            --card-hover: #18233a;
+            --ink: #f1f5f9;
+            --mut: #94a3b8;
+            --ln: #24324d;
+            --acc: #f59e0b;
+            --acc-glow: rgba(245, 158, 11, 0.25);
+            --prim: #3b82f6;
+            --l0: #10b981;
+            --l1: #f59e0b;
+            --l2: #f97316;
+            --l3: #ef4444;
+            --safe-area-top: env(safe-area-inset-top, 0px);
+            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+            box-sizing: border-box;
+        }
+
+        :root[data-theme="light"] {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --card-hover: #f1f5f9;
+            --ink: #0f172a;
+            --mut: #64748b;
+            --ln: #e2e8f0;
+            --acc: #d97706;
+            --acc-glow: rgba(217, 119, 6, 0.15);
+            --prim: #2563eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: 'Outfit', 'Mukta', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.55;
+            padding: var(--safe-area-top) 16px var(--safe-area-bottom);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        main {
+            max-width: 680px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 12px 0 40px;
+        }
+
+        /* Sangyan Ribbon */
+        .sangyan-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            color: var(--acc);
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .brand h1 {
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            line-height: 1.15;
+            background: linear-gradient(135deg, #fff 30%, var(--acc));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        :root[data-theme="light"] .brand h1 {
+            background: linear-gradient(135deg, #0f172a 40%, var(--acc));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand p {
+            font-size: 14px;
+            color: var(--mut);
+            margin-top: 3px;
+        }
+
+        .ctrls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        select {
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            background: var(--card);
+            color: var(--ink);
+            border: 1.5px solid var(--ln);
+            border-radius: 10px;
+            padding: 8px 12px;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        select:focus {
+            border-color: var(--acc);
+            box-shadow: 0 0 0 3px var(--acc-glow);
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--card);
+            border: 1.5px solid var(--ln);
+            color: var(--ink);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: var(--card-hover);
+            border-color: var(--mut);
+        }
+
+        /* Card Containers */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--ln);
+            border-radius: 16px;
+            padding: 16px;
+            margin-top: 14px;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+        }
+
+        /* Navigation Tabs */
+        .tabs {
+            display: flex;
+            gap: 6px;
+            background: var(--bg);
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid var(--ln);
+            margin-bottom: 14px;
+        }
+
+        .tabs button {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: var(--mut);
+            font-weight: 600;
+            font-size: 14px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tabs button.on {
+            background: var(--card);
+            color: var(--ink);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            font-weight: 700;
+        }
+
+        /* Text Input Area */
+        textarea {
+            width: 100%;
+            min-height: 125px;
+            font-family: inherit;
+            font-size: 15px;
+            background: var(--bg);
+            color: var(--ink);
+            border: 1.5px solid var(--ln);
+            border-radius: 12px;
+            padding: 12px;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        textarea:focus {
+            border-color: var(--acc);
+            box-shadow: 0 0 0 3px var(--acc-glow);
+        }
+
+        /* Samples Quick Bar */
+        .sample-pills {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .sample-pill {
+            background: var(--bg);
+            border: 1px solid var(--ln);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 12px;
+            color: var(--mut);
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sample-pill:hover {
+            border-color: var(--acc);
+            color: var(--acc);
+            background: var(--card-hover);
+        }
+
+        /* Screenshot Preview Bar */
+        .img-preview {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px dashed var(--prim);
+            padding: 8px 12px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+
+        .img-preview img {
+            width: 36px;
+            height: 36px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .img-preview button {
+            background: none;
+            border: none;
+            color: var(--l3);
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        /* Action Buttons Row */
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .btn {
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1.5px solid var(--ln);
+            background: var(--bg);
+            color: var(--ink);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 44px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--card-hover);
+            border-color: var(--mut);
+        }
+
+        .btn-primary {
+            background: var(--acc);
+            color: #000;
+            border-color: var(--acc);
+            font-weight: 700;
+        }
+
+        .btn-primary:hover {
+            background: #e59005;
+            border-color: #e59005;
+            box-shadow: 0 4px 12px var(--acc-glow);
+        }
+
+        .btn.rec-active {
+            background: var(--l3);
+            color: #fff;
+            border-color: var(--l3);
+            animation: pulse 1.5s infinite;
+        }
+
+        .btn.audio-playing {
+            background: var(--prim);
+            color: #fff;
+            border-color: var(--prim);
+            animation: pulseAudio 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
+
+        @keyframes pulseAudio {
+            0% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+            }
+        }
+
+        .status-msg {
+            font-size: 13px;
+            color: var(--mut);
+            margin-top: 10px;
+            min-height: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Output Results Area */
+        .result-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .reset-btn {
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            background: rgba(148, 163, 184, 0.1);
+            border: 1px solid var(--ln);
+            color: var(--ink);
+            border-radius: 8px;
+            padding: 6px 12px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+
+        .reset-btn:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: var(--l3);
+            color: var(--l3);
+        }
+
+        .meter-container {
+            background: var(--bg);
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            border: 1px solid var(--ln);
+        }
+
+        .meter-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s ease;
+        }
+
+        .risk-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .risk-title {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        .risk-badge {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .confidence-text {
+            font-size: 14px;
+            color: var(--mut);
+            margin-top: 6px;
+        }
+
+        .source-tag {
+            font-size: 12px;
+            color: var(--mut);
+            margin-top: 4px;
+            display: inline-block;
+            padding: 2px 6px;
+            background: var(--bg);
+            border-radius: 4px;
+            border: 1px solid var(--ln);
+        }
+
+        /* Red Flags */
+        .flag-list {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .flag-card {
+            background: var(--bg);
+            border-left: 4px solid var(--l2);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 14px;
+        }
+
+        .flag-card b {
+            display: block;
+            color: var(--ink);
+            margin-bottom: 2px;
+            font-size: 15px;
+        }
+
+        .flag-card p {
+            color: var(--mut);
+            margin: 0;
+        }
+
+        /* Actionable Steps */
+        .action-list {
+            padding-left: 20px;
+            margin-top: 8px;
+            font-size: 14px;
+            color: var(--ink);
+        }
+
+        .action-list li {
+            margin-bottom: 6px;
+        }
+
+        .action-list a {
+            color: var(--prim);
+            text-decoration: underline;
+            font-weight: 600;
+        }
+
+        /* Emergency Hotlines Strip */
+        .emergency-bar {
+            display: flex;
+            gap: 8px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .emergency-pill {
+            flex: 1;
+            min-width: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--l3);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .emergency-pill:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .scores-pill {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+            color: var(--prim);
+        }
+
+        .scores-pill:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+
+        /* Loading Analysis Skeleton */
+        .loading-box {
+            text-align: center;
+            padding: 24px 16px;
+        }
+
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid var(--ln);
+            border-top-color: var(--acc);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Questions Tab */
+        .question-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--ln);
+        }
+
+        .question-row span {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .q-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .q-btn {
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: 1px solid var(--ln);
+            background: var(--bg);
+            color: var(--ink);
+            cursor: pointer;
+        }
+
+        .q-btn.active {
+            background: var(--acc);
+            color: #000;
+            border-color: var(--acc);
+            font-weight: 700;
+        }
+
+        /* Footer / Trust Note */
+        .trust-footer {
+            font-size: 12px;
+            color: var(--mut);
+            margin-top: 24px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .trust-footer b {
+            color: var(--ink);
+        }
+
+        /* Utilities */
+        [hidden] {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <div class="sangyan-badge">
+            <span>🛡️ SANGYAN 2026</span>
+            <span>•</span>
+            <span>SEBI & NSDL Investor Protection</span>
+        </div>
+
+        <header>
+            <div class="brand">
+                <h1>ScamSatark</h1>
+                <p id="tag">Check any investment tip, scam message or link before you act</p>
+            </div>
+            <div class="ctrls">
+                <select id="lg" aria-label="Select Official Indian Language"></select>
+                <button id="th" class="icon-btn" aria-label="Toggle Theme" title="Switch Theme">☀️</button>
+            </div>
+        </header>
+
+        <div class="card">
+            <div class="tabs">
+                <button id="t1" class="on">Paste / Upload</button>
+                <button id="t2">Answer questions</button>
+            </div>
+
+            <!-- Tab 1: Direct Message / Screenshot / Voice Input -->
+            <div id="p1">
+                <textarea id="tx"
+                    placeholder="Paste the WhatsApp, SMS or Telegram message here, upload a screenshot, or tap the mic to speak..."></textarea>
+
+                <!-- Quick Demo Samples Bar for Hackathon Jury -->
+                <div class="sample-pills">
+                    <span style="font-size: 11px; color: var(--mut); display: flex; align-items: center;">Try
+                        Scenario:</span>
+                    <button class="sample-pill" onclick="loadSample(0)">🚨 Bank Account Block Threat</button>
+                    <button class="sample-pill" onclick="loadSample(1)">📈 VIP Telegram Tip (40% Profit)</button>
+                    <button class="sample-pill" onclick="loadSample(2)">📲 AnyDesk Screen Share APK</button>
+                    <button class="sample-pill" onclick="loadSample(3)">💼 WFH YouTube Like Job Fraud</button>
+                </div>
+
+                <div id="imgPreviewBox" class="img-preview" hidden>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <img id="imgThumb" src="" alt="Screenshot">
+                        <span id="imgName" style="font-weight: 600;">Screenshot attached</span>
+                    </div>
+                    <button id="imgClear" title="Remove screenshot">✕</button>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn btn-primary" id="go">
+                        <span>🔍</span> <span id="lbl_go">Check this message</span>
+                    </button>
+                    <button class="btn" id="mic">
+                        <span id="micIcon">🎤</span> <span id="lbl_mic">Speak</span>
+                    </button>
+                    <button class="btn" id="cam">
+                        <span>📷</span> <span id="lbl_cam">Screenshot</span>
+                    </button>
+                    <button class="btn" id="smp">
+                        <span>💡</span> <span id="lbl_smp">Try a sample</span>
+                    </button>
+                    <button class="btn reset-btn" id="btnResetInput" title="Clear all input">
+                        <span>🔄</span> <span>Reset</span>
+                    </button>
+                    <input type="file" id="img" accept="image/*" hidden>
+                </div>
+                <p class="status-msg" id="st"></p>
+            </div>
+
+            <!-- Tab 2: Interactive Assessment Quiz -->
+            <div id="p2" hidden>
+                <div id="qList"></div>
+                <div class="btn-row" style="margin-top: 16px;">
+                    <button class="btn btn-primary" id="gq">Check my answers</button>
+                    <button class="btn reset-btn" id="btnResetQuiz">
+                        <span>🔄</span> <span>Reset</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Verification Result View -->
+        <div id="out" hidden>
+            <!-- Loading State (Displayed while AI is analyzing) -->
+            <div class="card" id="loadingCard" hidden>
+                <div class="loading-box">
+                    <div class="spinner"></div>
+                    <b style="font-size: 16px; color: var(--acc);" id="loadingText">Analyzing with ScamSatark AI & SEBI
+                        Rules…</b>
+                    <p class="confidence-text" style="margin-top: 6px;">Scanning against 15+ fraud patterns and
+                        verifying manipulation tactics...</p>
+                </div>
+            </div>
+
+            <!-- Final Result Container (Revealed together when analysis finishes) -->
+            <div id="resultContent" hidden>
+                <div class="card">
+                    <div class="result-header-row">
+                        <span class="source-tag" id="src">Verified Verdict</span>
+                        <button class="reset-btn" id="btnResetResult" title="Start a new check">
+                            <span>🔄</span> <span>New Check</span>
+                        </button>
+                    </div>
+
+                    <div class="meter-container">
+                        <div class="meter-bar" id="bar"></div>
+                    </div>
+                    <div class="risk-header">
+                        <h2 class="risk-title" id="lv">Analyzing…</h2>
+                        <span class="risk-badge" id="riskBadge"></span>
+                    </div>
+                    <p class="confidence-text" id="cf"></p>
+
+                    <div class="btn-row" style="margin-top: 14px;">
+                        <button class="btn btn-primary" id="sp">
+                            <span id="spIcon">🔊</span> <span id="lbl_sp">Listen</span>
+                        </button>
+                        <button class="btn" id="sh">
+                            <span>📲</span> <span id="lbl_sh">Share warning</span>
+                        </button>
+                        <button class="btn" id="cpDossier"
+                            title="Copy structured incident report for Cybercrime / SEBI filing">
+                            <span>📋</span> <span id="lbl_dossier">Copy Report</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Why this looks risky / Red Flags (Dynamically Localized in ALL 22 Languages) -->
+                <div class="card" id="flagsCard">
+                    <b style="font-size: 16px;" id="lbl_wh">Why this looks risky</b>
+                    <div class="flag-list" id="fl"></div>
+                </div>
+
+                <!-- Recommended Protection Steps & Emergency Escalation -->
+                <div class="card" id="actionsCard">
+                    <b style="font-size: 16px;" id="lbl_ac">Recommended Protection Steps</b>
+                    <ul class="action-list" id="al"></ul>
+
+                    <div class="emergency-bar">
+                        <a href="tel:1930" class="emergency-pill">
+                            <span>📞</span> Call 1930 (Helpline)
+                        </a>
+                        <a href="https://scores.sebi.gov.in" target="_blank" rel="noopener"
+                            class="emergency-pill scores-pill">
+                            <span>🏛️</span> SEBI SCORES Portal
+                        </a>
+                        <a href="https://cybercrime.gov.in" target="_blank" rel="noopener" class="emergency-pill">
+                            <span>🛡️</span> cybercrime.gov.in
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p class="trust-footer" id="pv">
+            <b>Privacy First:</b> ScamSatark stores nothing, requires no login, and never accesses your SMS or OTPs.
+            Non-commercial public-good investor protection infrastructure.
+        </p>
+    </main>
+
+    <script>
+        // Master Red Flag Heuristics Engine (Deterministic Regex Rules)
+        const R = [
+            {
+                id: 'o', w: 4,
+                re: /(enter|share|send|tell|give|forward|input|verify|provide|fill)[^.]{0,35}\b(otp|one time password|pin|cvv|password|passcode|banking details|account details)\b|\b(otp|one time password|pin|cvv)\b[^.]{0,30}(enter|share|send|tell|give|provide|fill)|ओटीपी|पासवर्ड|पिन/i
+            },
+            {
+                id: 'k', w: 3,
+                re: /bank account (will be |has been )?(blocked|suspended|closed|frozen|deactivated)|account (will be |has been )?(blocked|suspended|closed)|prevent suspension|kyc (expired|pending|verification|update)|update (your )?(pan|aadhaar|kyc)|sim (blocked|deactivated)|खाता (बंद|ब्लॉक)|केवाईसी/i
+            },
+            {
+                id: 'b', w: 2,
+                re: /customer (security|support|service) team|bank manager|cyber (crime|cell|police)|cbi|sebi (officer|director|department)|rbi (alert|notice|officer)|security team|कस्टमर सपोर्ट|साइबर सेल/i
+            },
+            {
+                id: 'g', w: 3,
+                re: /guarante|assured|100\s?%|fixed return|risk[- ]?free|zero risk|pakka (munafa|profit|paisa)|pakki|गारंटी|पक्का|निश्चित|बिना जोखिम/i
+            },
+            {
+                id: 'r', w: 3,
+                re: /\d{2,3}\s?%[^.]{0,40}(month|week|day|daily|महीन|हफ्त|रोज)|double your money|paisa (double|dugna|dugni)|dugna|dugni|दुगना|दोगुना|30%|40%|50%/i
+            },
+            {
+                id: 'u', w: 2,
+                re: /hurry|limited (seats|slots|time)|last chance|today only|within \d+\s?(hour|min|hours)|immediately|urgent|turant|jaldi|sirf aaj|aaj hi|aakhri mauka|जल्दी|तुरंत|आखिरी मौका|घंटे में|सीमित/i
+            },
+            {
+                id: 's', w: 2,
+                re: /sebi[ -]?(registered|regd|reg\.? ?no|certified|approved|licen[cs]ed)|registered (with )?sebi|nsdl (certified|approved)|सेबी.{0,25}(रजिस्ट|पंजीकृत|मान्य)/i
+            },
+            {
+                id: 'l', w: 3,
+                re: {
+                    test: t => {
+                        const matches = t.match(/(?:https?:\/\/)?[\w.-]+\.[a-z]{2,}[^\s]*/gi) || [];
+                        return matches.some(u => {
+                            const d = u.replace(/^https?:\/\//i, '').split(/[\/?#]/)[0].toLowerCase();
+                            if (/(^|\.)(bit\.ly|tinyurl\.com|cutt\.ly|t\.me|wa\.me|shorturl\.at|rb\.gy|is\.gd)$/.test(d)) return true;
+                            if (/\.(xyz|top|click|vip|site|online|icu|live|shop|apk)$/.test(d)) return true;
+                            if (/(example\.com|verify|login|secure|account|update|kyc)/.test(u.toLowerCase())) return true;
+                            const c = d.replace(/\.(com|in|co\.in|org|net)$/, '');
+                            return /(sebi|nse|bse|zerodha|groww|upstox|nsdl|cdsl|sbi|hdfc|icici)/.test(c) && /[-]|\w(login|verify|pro|vip|trade|kyc)/.test(c);
+                        });
+                    }
+                }
+            },
+            {
+                id: 't', w: 2,
+                re: /telegram|whatsapp group|join (our|my|the) (group|channel)|\bvip\b|premium group|group (join|me judo|mein judo)|टेलीग्राम|ग्रुप जॉइन|ग्रुप में जुड़/i
+            },
+            {
+                id: 'a', w: 3,
+                re: /anydesk|teamviewer|quicksupport|rustdesk|install (the|this|our) app|\.apk|\bapk\b|ऐप इंस्टॉल|ऐप डाउनलोड/i
+            },
+            {
+                id: 'i', w: 2,
+                re: /insider|sure ?shot|jackpot|operator|multibagger|inside (info|news)|इनसाइडर|जैकपॉट|ऑपरेटर|पक्की टिप/i
+            },
+            {
+                id: 'p', w: 3,
+                re: /registration fee|deposit|transfer|pay (now|first|rs|₹)|upi|paisa (bhejo|bhej do|transfer)|jama karo|fees? (bharo|do)|processing fee|withdrawal fee|जमा करें|फीस|पैसे भेज|ट्रांसफर/i
+            },
+            {
+                id: 'f', w: 2,
+                re: /\bfined?\b|penalty|waive|overdue (fee|payment|toll)|unpaid (fine|toll|challan)|court (warrant|notice)|जुर्माना|चालान/i
+            },
+            {
+                id: 'z', w: 2,
+                re: /you (have )?won|you (will )?win|winner|lottery|lucky draw|\bprize\b|claim (your )?(reward|cashback|gift)|इनाम जीत|लॉटरी|कैशबैक/i
+            },
+            {
+                id: 'j', w: 3,
+                re: /work from home|part[- ]time job|shortlisted|\$?\d+\s?\/\s?hour|earn (rs\.?|₹|\$)?\s?\d[\d,]*\s?(per|a|\/)\s?(day|hour)|task.{0,15}(commission|earn)|घर बैठे कमा|पार्ट टाइम जॉब/i
+            }
+        ];
+
+        // Interactive Assessment Questions
+        const Q = {
+            o: ['Did they ask for your OTP, PIN, password, or sensitive details?', 'क्या उन्होंने आपका OTP, पासवर्ड, PIN या बैंक विवरण मांगा?'],
+            k: ['Did they claim your bank account, KYC, or SIM will be blocked?', 'क्या उन्होंने खाता, केवाईसी या सिम तुरंत ब्लॉक होने की धमकी दी?'],
+            g: ['Did they promise 100% guaranteed or risk-free returns?', 'क्या उन्होंने गारंटीड या बिना जोखिम के मुनाफ़े का वादा किया?'],
+            r: ['Did they promise doubling money or >30% monthly profit?', 'क्या उन्होंने पैसा डबल करने या 30%+ मासिक मुनाफ़े का दावा किया?'],
+            u: ['Are they rushing you to decide immediately today?', 'क्या वे आपको आज ही तुरंत फैसला करने को कह रहे हैं?'],
+            t: ['Do they want you to join a Telegram or WhatsApp VIP group?', 'क्या वे टेलीग्राम या व्हाट्सऐप VIP ग्रुप में जुड़ने को कह रहे हैं?'],
+            a: ['Did they ask you to install an app (AnyDesk/APK) or share screen?', 'क्या उन्होंने कोई ऐप (AnyDesk/APK) इंस्टॉल या स्क्रीन शेयर करने को कहा?'],
+            p: ['Do they demand advance registration or processing fees?', 'क्या वे पहले रजिस्ट्रेशन फीस या पैसे ट्रांसफर करने को कह रहे हैं?']
+        };
+
+        // Preset Real-World Hackathon Demonstration Samples
+        const DEMO_SAMPLES = [
+            `🚨 URGENT: Your bank account will be blocked today!
+We detected suspicious activity on your account. Verify your account immediately to prevent suspension.
+Click here: https://example.com/verify
+Enter your OTP and account details to complete verification.
+— Customer Security Team`,
+            `🔥 VIP STOCK TIPS 🔥
+SEBI registered advisor. 100% guaranteed 40% monthly returns!
+Insider operator calls with zero risk.
+Join our private VIP Telegram group: t.me/vipprofit_operator
+Pay Rs. 1999 registration fee via UPI today only!`,
+            `⚠️ SBI Bank Alert: Your YONO account access is temporarily frozen.
+To restore access, install our QuickSupport APK from: https://sbi-kyc-verify.vip/support.apk
+Our executive will guide you over screen share.`,
+            `💼 Part-time Work From Home Opportunity!
+Earn Rs. 5000 to Rs. 15000 per day by liking YouTube videos and rating hotels on Google Maps.
+No experience required. Transfer Rs. 500 security deposit to start your task immediately.`
+        ];
+
+        window.loadSample = function (index) {
+            $('tx').value = DEMO_SAMPLES[index];
+            currentImageBase64 = '';
+            $('imgPreviewBox').hidden = true;
+            $('go').click();
+        };
+
+        const $ = id => document.getElementById(id);
+        let L = 'en';
+        let curHits = [];
+        let currentImageBase64 = '';
+        let currentAiResult = null;
+        let userAnswers = {};
+        let isSpeaking = false;
+
+        // Color configurations
+        const LEVEL_CONFIG = [
+            { text: 'No Known Red Flags', color: 'var(--l0)', width: '15%', badge: 'Safe' },
+            { text: 'Medium Risk / Caution', color: 'var(--l1)', width: '45%', badge: 'Caution' },
+            { text: 'High Risk Alert', color: 'var(--l2)', width: '75%', badge: 'High Risk' },
+            { text: 'Very High Risk (Scam Alert)', color: 'var(--l3)', width: '100%', badge: 'Severe Threat' }
+        ];
+
+        function calcLevel(score) {
+            if (score === 0) return 0;
+            if (score <= 2) return 1;
+            if (score <= 5) return 2;
+            return 3;
+        }
+
+        // Language Selector Initialization (All 22 Official Indian Languages + English)
+        function initLanguages() {
+            const select = $('lg');
+            select.innerHTML = '';
+            const data = window.I18N_DATA || {};
+            Object.keys(data).forEach(code => {
+                const opt = document.createElement('option');
+                opt.value = code;
+                opt.textContent = `${data[code].native} (${data[code].name})`;
+                select.appendChild(opt);
+            });
+            select.value = L;
+            select.onchange = e => changeLanguage(e.target.value);
+        }
+
+        function changeLanguage(code) {
+            L = code;
+            document.documentElement.lang = code;
+            stopAudio();
+            const dict = getDict();
+
+            $('tag').textContent = dict.tag || 'Check any investment tip, scam message or link before you act';
+            $('tx').placeholder = dict.ph || 'Paste the message here...';
+            $('lbl_go').textContent = dict.go || 'Check this message';
+            $('lbl_mic').textContent = dict.mic || 'Speak';
+            $('lbl_cam').textContent = dict.cam || 'Screenshot';
+            $('lbl_smp').textContent = dict.smp || 'Try a sample';
+            $('t1').textContent = dict.t1 || 'Paste / Upload';
+            $('t2').textContent = dict.t2 || 'Answer questions';
+            $('lbl_sp').textContent = dict.sp || 'Listen';
+            $('lbl_sh').textContent = dict.sh || 'Share warning';
+            $('lbl_wh').textContent = dict.wh || 'Why this looks risky';
+            $('lbl_ac').textContent = dict.ac || 'Recommended Protection Steps';
+            $('pv').textContent = dict.pv || 'Privacy First: ScamSatark stores nothing...';
+            $('gq').textContent = dict.chk || 'Check my answers';
+
+            renderQuestions();
+
+            // Instant re-rendering of the entire results in the newly selected language!
+            if (!$('out').hidden && !$('resultContent').hidden) {
+                updateResultUI(currentAiResult);
+            }
+        }
+
+        function getDict() {
+            return (window.I18N_DATA && window.I18N_DATA[L] && window.I18N_DATA[L].dict) || window.I18N_DATA?.en?.dict || {};
+        }
+
+        function getRulesDict() {
+            return (window.I18N_DATA && window.I18N_DATA[L] && window.I18N_DATA[L].rules) || window.I18N_DATA?.en?.rules || {};
+        }
+
+        function renderQuestions() {
+            const dict = getDict();
+            const container = $('qList');
+            container.innerHTML = Object.keys(Q).map(key => {
+                const qText = (L === 'hi' ? Q[key][1] : Q[key][0]);
+                const isYes = userAnswers[key] === 1;
+                const isNo = userAnswers[key] === 0;
+                return `
+      <div class="question-row">
+        <span>${qText}</span>
+        <div class="q-actions">
+          <button class="q-btn ${isYes ? 'active' : ''}" onclick="setAnswer('${key}', 1)">${dict.yes || 'Yes'}</button>
+          <button class="q-btn ${isNo ? 'active' : ''}" onclick="setAnswer('${key}', 0)">${dict.no || 'No'}</button>
+        </div>
+      </div>
+    `;
+            }).join('');
+        }
+
+        window.setAnswer = function (key, val) {
+            userAnswers[key] = val;
+            renderQuestions();
+        };
+
+        $('gq').onclick = () => {
+            const positiveKeys = Object.keys(userAnswers).filter(k => userAnswers[k] === 1);
+            executeAnalysis(positiveKeys, '', '');
+        };
+
+        // Deterministic Pattern Evaluation
+        function evaluateRules(text) {
+            if (!text) return [];
+            return R.filter(rule => {
+                if (typeof rule.re.test === 'function') {
+                    return rule.re.test(text);
+                }
+                return rule.re.test(text);
+            }).map(r => r.id);
+        }
+
+        // Unified Analysis Flow: Clean Loading -> Single Synchronized Result Reveal
+        async function executeAnalysis(matchedIds, text, imageBase64) {
+            curHits = matchedIds;
+            stopAudio();
+
+            // Show Result Area with Loading State (Hiding "Why this looks risky" until AI finishes)
+            $('out').hidden = false;
+            $('loadingCard').hidden = false;
+            $('resultContent').hidden = true;
+            $('loadingText').textContent = 'Analyzing message with ScamSatark AI & SEBI Rules…';
+            $('out').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            try {
+                $('st').textContent = '⚡ Inspecting fraud vectors & official SEBI registries…';
+                const response = await fetch('/api/check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: text,
+                        img: imageBase64,
+                        lang: L,
+                        hits: matchedIds
+                    })
+                });
+
+                let aiResult = null;
+                if (response.ok) {
+                    aiResult = await response.json();
+                }
+                currentAiResult = aiResult;
+                $('st').textContent = '';
+
+                // Hide Loading, Reveal Result Content cleanly
+                $('loadingCard').hidden = true;
+                $('resultContent').hidden = false;
+                updateResultUI(aiResult);
+            } catch (err) {
+                console.warn('AI check error, using deterministic rules', err);
+                $('st').textContent = 'ℹ️ Completed via ScamSatark Deterministic Engine.';
+                currentAiResult = null;
+                $('loadingCard').hidden = true;
+                $('resultContent').hidden = false;
+                updateResultUI(null);
+            }
+        }
+
+        function updateResultUI(aiResult) {
+            const dict = getDict();
+            const rulesDict = getRulesDict();
+            const matchedRules = R.filter(r => curHits.includes(r.id));
+            const rawScore = matchedRules.reduce((acc, r) => acc + r.w, 0);
+
+            let finalLevel = calcLevel(rawScore);
+            if (aiResult && typeof aiResult.level === 'number') {
+                finalLevel = Math.max(finalLevel, aiResult.level);
+            }
+
+            const levelInfo = LEVEL_CONFIG[finalLevel];
+
+            // Meter & Title
+            $('bar').style.width = levelInfo.width;
+            $('bar').style.backgroundColor = levelInfo.color;
+            $('lv').textContent = dict['lv' + finalLevel] || levelInfo.text;
+            $('lv').style.color = levelInfo.color;
+            $('riskBadge').textContent = levelInfo.badge;
+            $('riskBadge').style.backgroundColor = levelInfo.color;
+            $('riskBadge').style.color = '#000';
+
+            // Confidence / Explanatory Text
+            if (aiResult && aiResult.confidence_note) {
+                $('cf').textContent = aiResult.confidence_note;
+                $('src').textContent = dict.ai || 'Verified by Gemini AI + SEBI Scam Rule Engine.';
+            } else {
+                $('cf').textContent = curHits.length
+                    ? (dict.cfn || '{n} of {m} known scam patterns matched.').replace('{n}', curHits.length).replace('{m}', R.length)
+                    : (dict.nocf || 'No known red flag patterns matched.');
+                $('src').textContent = dict.off || 'Fast Analysis (Deterministic Rule Engine)';
+            }
+
+            // Red Flags List (Dynamically populated in the active language from rulesDict!)
+            const flagsContainer = $('fl');
+            let flagHtml = '';
+
+            matchedRules.forEach(r => {
+                const item = rulesDict[r.id] || window.I18N_DATA?.en?.rules?.[r.id] || { title: 'Suspicious Vector', why: 'Risk pattern matched.' };
+                flagHtml += `
+      <div class="flag-card">
+        <b>⚠️ ${escapeHtml(item.title)}</b>
+        <p>${escapeHtml(item.why)}</p>
+      </div>
+    `;
+            });
+
+            if (aiResult && Array.isArray(aiResult.flags)) {
+                aiResult.flags.forEach(f => {
+                    // Avoid duplicate display if rule title already matched
+                    const alreadyShown = matchedRules.some(r => {
+                        const item = rulesDict[r.id];
+                        return item && (item.title === f.title || f.title.toLowerCase().includes(item.title.toLowerCase()));
+                    });
+                    if (!alreadyShown) {
+                        flagHtml += `
+          <div class="flag-card" style="border-left-color: var(--prim);">
+            <b>🛡️ ${escapeHtml(f.title)}</b>
+            <p>${escapeHtml(f.why)}</p>
+          </div>
+        `;
+                    }
+                });
+            }
+
+            if (aiResult && aiResult.lesson) {
+                flagHtml += `
+      <div class="flag-card" style="border-left-color: var(--acc); background: rgba(245, 158, 11, 0.08);">
+        <b>💡 ${dict.ls || 'Manipulation Tactic:'}</b>
+        <p>${escapeHtml(aiResult.lesson)}</p>
+      </div>
+    `;
+            }
+
+            flagsContainer.innerHTML = flagHtml || `<p class="confidence-text">No active red flags detected in this input.</p>`;
+
+            // Actionable Steps
+            const al = $('al');
+            al.innerHTML = `
+    <li>${dict.al0 || 'Do not transfer money, pay upfront fees, install any app, or share OTP.'}</li>
+    <li>${dict.al1 || 'Verify any advisor yourself on the official SEBI portal at <a href="https://sebi.gov.in" target="_blank">sebi.gov.in</a>.'}</li>
+    <li>${dict.al2 || 'Show this message to family members or friends before taking any action.'}</li>
+    <li>${dict.al3 || 'Lost money? Immediately call 1930 or report at <a href="https://cybercrime.gov.in" target="_blank">cybercrime.gov.in</a>.'}</li>
+  `;
+        }
+
+        function escapeHtml(str) {
+            return String(str || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        // Master Reset Function
+        function resetAll() {
+            stopAudio();
+            $('tx').value = '';
+            currentImageBase64 = '';
+            currentAiResult = null;
+            curHits = [];
+            userAnswers = {};
+            $('imgPreviewBox').hidden = true;
+            $('out').hidden = true;
+            $('loadingCard').hidden = true;
+            $('resultContent').hidden = true;
+            $('st').textContent = '';
+            renderQuestions();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            $('tx').focus();
+        }
+
+        $('btnResetInput').onclick = resetAll;
+        $('btnResetQuiz').onclick = resetAll;
+        $('btnResetResult').onclick = resetAll;
+
+        // Trigger Message Check
+        $('go').onclick = () => {
+            const text = $('tx').value.trim();
+            if (!text && !currentImageBase64) {
+                $('tx').focus();
+                $('st').textContent = 'Please paste a message, upload a screenshot, or speak.';
+                return;
+            }
+            const hits = evaluateRules(text);
+            executeAnalysis(hits, text, currentImageBase64);
+        };
+
+        // Test Sample Trigger (Loads first bank scam scenario)
+        $('smp').onclick = () => loadSample(0);
+
+        // Screenshot Upload & Processing
+        $('cam').onclick = () => $('img').click();
+
+        $('img').onchange = e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                const img = new Image();
+                img.onload = () => {
+                    const maxDim = 1200;
+                    let w = img.width, h = img.height;
+                    if (w > maxDim || h > maxDim) {
+                        if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
+                        else { w = Math.round((w * maxDim) / h); h = maxDim; }
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w; canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    currentImageBase64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+
+                    $('imgThumb').src = canvas.toDataURL('image/jpeg', 0.3);
+                    $('imgName').textContent = file.name || 'Screenshot attached';
+                    $('imgPreviewBox').hidden = false;
+                    $('st').textContent = '📷 Screenshot attached. Click "Check this message" to scan.';
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        };
+
+        $('imgClear').onclick = () => {
+            currentImageBase64 = '';
+            $('imgPreviewBox').hidden = true;
+            $('st').textContent = '';
+        };
+
+        // Dual-Engine Microphone / Speech Recognition Handler
+        let speechRec = null;
+        let mediaRec = null;
+        let audioChunks = [];
+        let isMicActive = false;
+
+        $('mic').onclick = async () => {
+            const dict = getDict();
+            if (isMicActive) {
+                stopRecording();
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const bcp47 = (window.I18N_DATA && window.I18N_DATA[L] && window.I18N_DATA[L].bcp47) || 'en-IN';
+            let speechCaptured = false;
+
+            // Try Browser Web Speech API
+            if (SpeechRecognition) {
+                try {
+                    speechRec = new SpeechRecognition();
+                    speechRec.lang = bcp47;
+                    speechRec.continuous = true;
+                    speechRec.interimResults = true;
+
+                    speechRec.onstart = () => {
+                        isMicActive = true;
+                        $('mic').classList.add('rec-active');
+                        $('micIcon').textContent = '⏹';
+                        $('lbl_mic').textContent = 'Stop';
+                        $('st').textContent = `🎙️ Listening in ${window.I18N_DATA[L]?.name || 'chosen language'}... Speak now!`;
+                    };
+
+                    speechRec.onresult = event => {
+                        let text = '';
+                        for (let i = 0; i < event.results.length; ++i) {
+                            text += event.results[i][0].transcript;
+                        }
+                        if (text.trim()) {
+                            speechCaptured = true;
+                            $('tx').value = text;
+                            $('st').textContent = '🗣️ Recording speech...';
+                        }
+                    };
+
+                    speechRec.onerror = err => {
+                        console.warn('SpeechRecognition error:', err.error);
+                        if (!speechCaptured) {
+                            fallbackAudioRecord(bcp47);
+                        }
+                    };
+
+                    speechRec.onend = () => {
+                        if (!isMicActive) return;
+                        stopRecording();
+                        if (speechCaptured) {
+                            $('st').textContent = '✅ Speech captured successfully!';
+                        }
+                    };
+
+                    speechRec.start();
+                    return;
+                } catch (e) {
+                    console.warn('Web Speech init failed, switching to MediaRecorder', e);
+                }
+            }
+
+            // Fallback direct Audio Recording
+            fallbackAudioRecord(bcp47);
+        };
+
+        function stopRecording() {
+            isMicActive = false;
+            $('mic').classList.remove('rec-active');
+            $('micIcon').textContent = '🎤';
+            $('lbl_mic').textContent = getDict().mic || 'Speak';
+            if (speechRec) {
+                try { speechRec.stop(); } catch (e) { }
+                speechRec = null;
+            }
+            if (mediaRec && mediaRec.state === 'recording') {
+                try { mediaRec.stop(); } catch (e) { }
+            }
+        }
+
+        async function fallbackAudioRecord(bcp47) {
+            const dict = getDict();
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                $('st').textContent = dict.nomic || 'Microphone access is not available in this browser.';
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioChunks = [];
+                const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+                mediaRec = new MediaRecorder(stream, { mimeType });
+
+                mediaRec.ondataavailable = e => {
+                    if (e.data.size > 0) audioChunks.push(e.data);
+                };
+
+                mediaRec.onstop = async () => {
+                    stream.getTracks().forEach(t => t.stop());
+                    stopRecording();
+                    if (audioChunks.length === 0) return;
+
+                    $('st').textContent = '⚡ Transcribing your voice via Gemini AI…';
+                    try {
+                        const audioBlob = new Blob(audioChunks, { type: mimeType });
+                        const reader = new FileReader();
+                        reader.onload = async () => {
+                            const b64 = reader.result.split(',')[1];
+                            const resp = await fetch('/api/transcribe', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ lang: L, audio: b64, mimeType })
+                            });
+                            const j = await resp.json();
+                            if (j.text) {
+                                $('tx').value = ($('tx').value ? $('tx').value + ' ' : '') + j.text;
+                                $('st').textContent = '✅ Voice converted to text!';
+                            } else {
+                                $('st').textContent = dict.nosound || 'No clear speech detected. Please speak closer to the mic.';
+                            }
+                        };
+                        reader.readAsDataURL(audioBlob);
+                    } catch (err) {
+                        $('st').textContent = dict.micfail || 'Transcription error occurred.';
+                    }
+                };
+
+                mediaRec.start(250);
+                isMicActive = true;
+                $('mic').classList.add('rec-active');
+                $('micIcon').textContent = '⏹';
+                $('lbl_mic').textContent = 'Stop';
+                $('st').textContent = `🎙️ Recording audio in ${window.I18N_DATA[L]?.name || 'chosen language'}... Tap Stop when done!`;
+            } catch (err) {
+                $('st').textContent = dict.micdeny || 'Microphone permission blocked. Please allow mic in browser settings.';
+                stopRecording();
+            }
+        }
+
+        // Regional Language Text-to-Speech (TTS) with In-Between Stop Option & Guaranteed Native Text
+        function stopAudio() {
+            isSpeaking = false;
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+            $('sp').classList.remove('audio-playing');
+            $('spIcon').textContent = '🔊';
+            $('lbl_sp').textContent = getDict().sp || 'Listen';
+        }
+
+        $('sp').onclick = () => {
+            if (isSpeaking) {
+                stopAudio();
+                return;
+            }
+
+            const dict = getDict();
+            const rulesDict = getRulesDict();
+            const synth = window.speechSynthesis;
+            if (!synth) {
+                $('st').textContent = dict.novoice || 'Audio speech not supported on this browser.';
+                return;
+            }
+
+            synth.cancel();
+
+            // Assemble speech content in the ACTIVE regional language from the translated dictionary
+            const title = $('lv').textContent;
+            const desc = $('cf').textContent;
+
+            const matchedRules = R.filter(r => curHits.includes(r.id));
+            const flagSpeech = matchedRules.map(r => {
+                const item = rulesDict[r.id];
+                return item ? `${item.title}. ${item.why}` : '';
+            }).filter(Boolean).join('. ');
+
+            const speechText = `${title}. ${desc}. ${flagSpeech}. ${dict.al0 || ''}`;
+
+            const utterance = new SpeechSynthesisUtterance(speechText);
+            const bcp47 = (window.I18N_DATA && window.I18N_DATA[L] && window.I18N_DATA[L].bcp47) || 'en-IN';
+            utterance.lang = bcp47;
+            utterance.rate = 0.90;
+
+            // Find exact voice matching regional language (e.g. Tamil, Hindi, Bengali, Telugu, Marathi, etc.)
+            const voices = synth.getVoices();
+            const langPrefix = bcp47.slice(0, 2).toLowerCase();
+            const matchedVoice = voices.find(v => v.lang.toLowerCase() === bcp47.toLowerCase())
+                || voices.find(v => v.lang.toLowerCase().replace('_', '-').startsWith(langPrefix))
+                || voices.find(v => v.name.toLowerCase().includes(window.I18N_DATA[L]?.name.toLowerCase()));
+
+            if (matchedVoice) {
+                utterance.voice = matchedVoice;
+                utterance.lang = matchedVoice.lang;
+            }
+
+            utterance.onstart = () => {
+                isSpeaking = true;
+                $('sp').classList.add('audio-playing');
+                $('spIcon').textContent = '⏹';
+                $('lbl_sp').textContent = 'Stop Audio';
+            };
+
+            utterance.onend = () => {
+                stopAudio();
+            };
+
+            utterance.onerror = () => {
+                stopAudio();
+            };
+
+            synth.speak(utterance);
+        };
+
+        // WhatsApp Warning Share
+        $('sh').onclick = () => {
+            const risk = $('lv').textContent;
+            const msg = `⚠️ *ScamSatark Warning*:\nI verified an investment / financial message using ScamSatark (SEBI & NSDL Initiative).\n\n*Verdict:* ${risk}\n*Details:* ${$('cf').textContent}\n\nDo not send money or share OTPs! Verify at https://sebi.gov.in or report on cybercrime.gov.in / Dial 1930.`;
+            window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+        };
+
+        // Copy Structured Incident Dossier for Cybercrime / SEBI SCORES Filing
+        $('cpDossier').onclick = async () => {
+            const risk = $('lv').textContent;
+            const conf = $('cf').textContent;
+            const matchedRules = R.filter(r => curHits.includes(r.id));
+            const rDict = getRulesDict();
+            const flagLines = matchedRules.map(r => `• ${rDict[r.id]?.title || r.id}: ${rDict[r.id]?.why || ''}`).join('\n');
+            const lesson = currentAiResult?.lesson ? `\n[Manipulation Vector]: ${currentAiResult.lesson}` : '';
+            const textSnippet = $('tx').value.trim() ? `\n[Reported Message Snippet]:\n${$('tx').value.trim()}` : '';
+
+            const report = `========================================
+SCAMSATARK INCIDENT & FRAUD DOSSIER
+National Investor Protection (SANGYAN 2026)
+========================================
+Timestamp: ${new Date().toISOString()}
+Language: ${window.I18N_DATA[L]?.name} (${window.I18N_DATA[L]?.native})
+Threat Assessment: ${risk}
+Summary: ${conf}
+
+[Identified Red Flags]:
+${flagLines || '• Multiple deceptive indicators detected.'}${lesson}${textSnippet}
+
+[Emergency Action Checklist]:
+1. Do NOT transfer funds, share OTPs, or install remote access APKs.
+2. Verify entity on official SEBI Registry: https://sebi.gov.in
+3. File complaint on SEBI SCORES: https://scores.sebi.gov.in
+4. Dial 1930 or file complaint at: https://cybercrime.gov.in
+========================================`;
+
+            try {
+                await navigator.clipboard.writeText(report);
+                $('lbl_dossier').textContent = 'Copied! ✅';
+                setTimeout(() => { $('lbl_dossier').textContent = 'Copy Report'; }, 2500);
+            } catch (err) {
+                prompt('Copy your incident dossier below:', report);
+            }
+        };
+
+        // Theme Management (Default: Dark)
+        function initTheme() {
+            const saved = localStorage.getItem('sat_theme') || 'dark';
+            setTheme(saved);
+        }
+
+        function setTheme(theme) {
+            document.documentElement.dataset.theme = theme;
+            try { localStorage.setItem('sat_theme', theme); } catch (e) { }
+            $('th').textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+
+        $('th').onclick = () => {
+            const current = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+            setTheme(current);
+        };
+
+        // Navigation Tabs Handling
+        $('t1').onclick = () => {
+            $('p1').hidden = false;
+            $('p2').hidden = true;
+            $('t1').className = 'on';
+            $('t2').className = '';
+        };
+
+        $('t2').onclick = () => {
+            $('p1').hidden = true;
+            $('p2').hidden = false;
+            $('t2').className = 'on';
+            $('t1').className = '';
+            renderQuestions();
+        };
+
+        // Pre-load voices for SpeechSynthesis
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                try { window.speechSynthesis.getVoices(); } catch (e) { }
+            };
+        }
+
+        // Initialize Application
+        initLanguages();
+        initTheme();
+        changeLanguage('en');
+    </script>
+</body>
+
+</html>
